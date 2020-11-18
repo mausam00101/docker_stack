@@ -1,0 +1,54 @@
+version: '3.4'
+services:
+  nginx:
+   container_name: nginx
+   image: nginx:1.13
+   restart: always
+   ports:
+   - 8000:8000
+   volumes:
+   - ./nginx/conf.d:/etc/nginx/conf.d
+   depends_on:
+   - app_blue
+   - app1_blue
+  
+  app_blue:
+    restart: always
+    stop_grace_period: 30s
+    build: ./countries
+    working_dir: /opt/countries
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 1s
+      timeout: 3s
+      retries: 60
+    environment:
+    - CATALINA_OPTS=-Xmx2048m -Xms2048m -XX:MaxPermSize=2048m
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+    stop_grace_period: 30s
+
+  app1_blue:
+    restart: always
+    stop_grace_period: 30s
+    build: ./airports
+    working_dir: /opt/airport/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 1s
+      timeout: 5s
+      retries: 120
+    environment:
+    - CATALINA_OPTS=-Xmx2048m -Xms2048m -XX:MaxPermSize=2048m
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+    stop_grace_period: 30s
+

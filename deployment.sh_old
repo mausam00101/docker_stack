@@ -1,0 +1,8 @@
+#!/bin/sh
+read -p "Enter the app name which you want to deploy! : " name
+docker-compose --verbose up -d --scale ${name}=4
+
+sleep 60
+
+docker-compose --verbose up -d --scale ${name}=2
+

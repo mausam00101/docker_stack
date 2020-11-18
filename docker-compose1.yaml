@@ -1,0 +1,41 @@
+version: '3.4'
+services:
+  app:
+    restart: always
+    stop_grace_period: 30s
+    build: ./countries
+    working_dir: /opt/countries
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 1s
+      timeout: 3s
+      retries: 60
+    environment:
+    - CATALINA_OPTS=-Xmx1024m -Xms1024m -XX:MaxPermSize=1024m
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+    stop_grace_period: 30s
+
+  app1:
+    restart: always
+    stop_grace_period: 30s
+    build: ./airports
+    working_dir: /opt/airport/
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 1s
+      timeout: 5s
+      retries: 120
+    environment:
+    - CATALINA_OPTS=-Xmx2048m -Xms2048m -XX:MaxPermSize=2048m
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+    stop_grace_period: 30s
